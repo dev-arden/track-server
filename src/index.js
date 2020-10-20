@@ -1,7 +1,17 @@
+require('./models/User');//여기서 한번만, 그렇지 않으면 이미정의했다는 에러가 뜸.
+require('./models/Track');
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const authRoutes = require('./routes/authRoutes');
+const trackRoutes = require('./routes/trackRoutes');
+const requireAuth = require('./middlewares/requireAuth');
 
 const app = express();
+
+app.use(bodyParser.json());
+app.use(authRoutes);
+app.use(trackRoutes);
 
 const mongoUri = 'mongodb+srv://admin:Wkdnfla11*^^*@cluster0.hy9sz.mongodb.net/<dbname>?retryWrites=true&w=majority';
 
@@ -17,8 +27,8 @@ mongoose.connection.on('error', () => {
   console.error('Error connecting to mongo', err);
 });
 
-app.get('/', (req, res) => {
-  res.send('Hi there!');
+app.get('/', requireAuth, (req, res) => {
+  res.send(`Your email: ${req.user.email}`);
 });
 
 app.listen(3000, () => {
